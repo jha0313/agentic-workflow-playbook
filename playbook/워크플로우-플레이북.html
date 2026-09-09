@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에이전틱 워크플로우 플레이북 — 6단계 루프</title>
+<style>
+:root{
+  --bg:#0e1014; --panel:#161a21; --panel2:#1d222b; --line:#2b313d; --text:#e9ecf2; --muted:#9aa4b5;
+  --accent:#7cc4ff; --ctx:#b8a4ff; --verify:#ffb454; --danger:#ff6b6b; --ok:#6bd68f; --dev:#7cc4ff; --pm:#ff9ecb;
+  --r:14px; --maxw:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.65 -apple-system,"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;letter-spacing:-.01em}
+a{color:var(--accent);text-decoration:none}
+code,pre,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+h1,h2,h3{line-height:1.25;margin:0 0 .5em;letter-spacing:-.02em}
+h1{font-size:44px;font-weight:800}
+h2{font-size:32px;font-weight:800}
+h3{font-size:21px;font-weight:700}
+p{margin:.4em 0 .9em}
+.muted{color:var(--muted)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+section{padding:72px 0 40px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+.lead{font-size:21px;color:#cfd5e0}
+.hl{color:var(--verify);font-weight:700}
+.hl2{color:var(--ctx);font-weight:700}
+mark{background:rgba(255,180,84,.18);color:var(--text);padding:0 .25em;border-radius:4px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(14,16,20,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:10px 28px;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav a{white-space:nowrap;font-size:14px;font-weight:600;color:var(--muted);padding:7px 12px;border-radius:999px;border:1px solid transparent}
+nav a:hover{color:var(--text)}
+nav a.on{color:var(--text);background:var(--panel2);border-color:var(--line)}
+nav .brand{font-weight:800;color:var(--text);margin-right:8px;padding-left:0}
+
+/* cards / grid */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+.card h3{margin-top:0}
+.card.accent{border-color:rgba(124,196,255,.45)}
+.card.verify{border-color:rgba(255,180,84,.5)}
+.card.ctx{border-color:rgba(184,164,255,.5)}
+.num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-weight:800;font-size:15px;margin-right:10px;color:var(--accent)}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.tw{overflow-x:auto;border-radius:var(--r)}
+th,td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel2);font-weight:700;font-size:14px;color:var(--muted);letter-spacing:.04em}
+tr:last-child td{border-bottom:0}
+td b{color:var(--text)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-right:6px;vertical-align:middle}
+.tag.dev{color:var(--dev);border-color:rgba(124,196,255,.4)} .tag.pm{color:var(--pm);border-color:rgba(255,158,203,.4)}
+.tag.mach{color:var(--ok);border-color:rgba(107,214,143,.4)} .tag.ext{color:var(--verify);border-color:rgba(255,180,84,.4)}
+
+/* loop diagram */
+.loop{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px 22px 18px;position:relative}
+.orch{font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-align:center;margin-bottom:14px}
+.orch b{color:var(--text)}
+.row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.node{--c:var(--accent);position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:118px;padding:14px 12px 12px;border-radius:12px;border:2px solid var(--line);background:var(--panel2);cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s;user-select:none}
+.node:hover{transform:translateY(-2px);border-color:var(--c)}
+.node.on{border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
+.node .n{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--c)}
+.node .t{font-size:20px;font-weight:800}
+.node .s{font-size:12px;color:var(--muted);text-align:center;line-height:1.3}
+.node .who{position:absolute;top:-12px;right:-8px;font-size:18px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));display:none}
+.node.human .who{display:block}
+.node.auto{opacity:.85}
+.node.auto::after{content:"자동";position:absolute;top:-10px;left:-6px;font-size:11px;font-weight:800;background:var(--ok);color:#06210f;padding:1px 7px;border-radius:999px}
+.arrow{color:var(--muted);font-size:22px;font-weight:300}
+.ctxrow{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+.node.ctx{--c:var(--ctx)}
+.node.v{--c:var(--verify)}
+.fb{font-size:13px;color:var(--muted);text-align:center;margin-top:8px}
+.fb b{color:var(--ctx)}
+.paths{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.path{font-size:13px;padding:6px 12px;border-radius:999px;border:1px dashed var(--line);color:var(--muted)}
+.path.a{border-color:rgba(107,214,143,.6);color:var(--ok)} .path.b{border-color:rgba(255,107,107,.6);color:var(--danger)}
+.detail{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;min-height:220px}
+.detail .hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.detail .hd .big{font-size:30px;font-weight:800}
+.detail .hd .sub{color:var(--muted)}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:8px 14px;font-size:16px}
+.kv dt{color:var(--muted);font-weight:700;font-size:14px;padding-top:2px}
+.kv dd{margin:0}
+.kv .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.kv{grid-template-columns:1fr}.kv .two{grid-template-columns:1fr}}
+.kv .two>div{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px}
+.kv .two b{display:block;font-size:12px;letter-spacing:.1em;margin-bottom:4px}
+.hint{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* segmented */
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px;flex-wrap:wrap}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:15px;font-weight:700;padding:8px 16px;border-radius:999px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#04121f}
+.seg.verify button.on{background:var(--verify);color:#231300}
+
+/* callout */
+.callout{border-left:4px solid var(--verify);background:rgba(255,180,84,.08);padding:16px 20px;border-radius:0 var(--r) var(--r) 0;margin:18px 0}
+.callout.ctx{border-color:var(--ctx);background:rgba(184,164,255,.08)}
+.callout.danger{border-color:var(--danger);background:rgba(255,107,107,.08)}
+.callout p:last-child{margin-bottom:0}
+.big-quote{font-size:26px;font-weight:800;line-height:1.4;margin:24px 0}
+
+/* chain */
+.chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.chain .c{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:700;font-size:15px}
+.chain .c small{display:block;font-weight:600;color:var(--muted);font-size:12px}
+.chain .ar{color:var(--muted)}
+
+/* tabs (cases) */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font:inherit;font-size:15px;font-weight:700;padding:8px 14px;border-radius:10px;cursor:pointer}
+.tabs button.on{color:var(--text);border-color:var(--accent);background:rgba(124,196,255,.12)}
+.case{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:860px){.case{grid-template-columns:1fr}}
+.case .card{position:relative}
+.case .card .lbl{position:absolute;top:-11px;left:16px;font-size:12px;font-weight:800;letter-spacing:.12em;padding:2px 10px;border-radius:999px;background:var(--bg);border:1px solid}
+.case .pmc .lbl{color:var(--pm);border-color:var(--pm)} .case .devc .lbl{color:var(--dev);border-color:var(--dev)}
+.case ul{margin:.3em 0 0;padding-left:1.15em} .case li{margin:.25em 0}
+
+/* pre / copy */
+pre{background:#0a0c10;border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;font-size:14.5px;line-height:1.6;overflow-x:auto;white-space:pre;color:#d9dee8;margin:0}
+pre .slot{color:var(--verify);font-weight:700}
+pre .cm{color:var(--muted)}
+.prewrap{position:relative}
+.copy{position:absolute;top:12px;right:12px;appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer}
+.copy:hover{border-color:var(--accent)}
+
+/* ladder */
+.ladder-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0 18px}
+@media (max-width:860px){.ladder-steps{grid-template-columns:1fr}}
+.step{cursor:pointer;background:var(--panel);border:2px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.step.on{border-color:var(--accent)}
+.step b{display:block;font-size:19px;margin-bottom:4px}
+.step small{color:var(--muted)}
+
+/* misc */
+.pill-list{display:flex;gap:8px;flex-wrap:wrap}
+.pill-list span{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+footer{padding:50px 0 80px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+.hero{padding:90px 0 60px}
+.hero .lead{max-width:860px}
+.two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:start}
+@media (max-width:900px){.two-col{grid-template-columns:1fr}}
+.invariant{background:linear-gradient(135deg,rgba(255,180,84,.14),rgba(255,180,84,.03));border:1px solid rgba(255,180,84,.45);border-radius:var(--r);padding:22px 24px}
+.invariant .t{font-size:13px;font-weight:800;letter-spacing:.16em;color:var(--verify);margin-bottom:8px}
+.invariant .q{font-size:22px;font-weight:800;line-height:1.4}
+kbd{font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;background:var(--panel2);color:var(--muted)}
+
+/* 로드맵 */
+.road{display:flex;gap:10px;align-items:stretch;margin-top:18px}
+.road .seg{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:var(--r);padding:16px 16px 12px;min-width:0}
+.road .seg .t{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;font-variant-numeric:tabular-nums}
+.road .seg h3{margin:0 0 6px;font-size:19px;line-height:1.3} .road .seg p{margin:0 0 4px;font-size:14px;line-height:1.5} .road .seg p.muted{font-size:13px}
+.road .b2{border-top-color:var(--pm)} .road .b3{border-top-color:var(--dev)} .road .b4{border-top-color:var(--ok)} .road .b5{border-top-color:var(--muted)}
+.road-legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--muted)}
+.road-legend span{display:inline-flex;align-items:center;gap:6px} .road-legend i{display:inline-block;width:14px;height:4px;border-radius:2px;background:var(--accent)}
+.road-legend i.b2{background:var(--pm)} .road-legend i.b3{background:var(--dev)}
+@media (max-width:900px){.road{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top">6단계 루프</a>
+  <a href="#agenda">로드맵</a>
+  <a href="#why">진단</a>
+  <a href="#loop">루프</a>
+  <a href="#verify">5번 두 층</a>
+  <a href="#ladder">사다리</a>
+  <a href="#principles">원칙</a>
+  <a href="#start">바로 쓰기</a>
+  <a href="#cases">사례 A·B</a>
+  <a href="#when">언제 쓰지 말까</a>
+  <a href="#template">템플릿</a>
+  <a href="#skill">스킬로</a>
+</div></nav>
+
+<!-- ───────── HERO ───────── -->
+<section id="top" class="hero"><div class="wrap">
+  <div class="kicker">Agentic Workflow Playbook</div>
+  <h1>에이전틱 워크플로우 플레이북<br><span class="muted" style="font-weight:700">AI에게 칸이 아니라 절차 전체를 넘기는 6단계 루프</span></h1>
+  <p class="lead">AI가 <b>실행을 싸게</b> 만들었다. 그래서 가치도, 고통도 전부 <b>검증</b>으로 옮겨갔다.<br>
+  버티는 워크플로우는 검증을 <b>독립된 외부 단계</b>로 다룬다 — <span class="hl">작업한 에이전트가 자기 결과를 채점하게 두지 않는다.</span></p>
+  <div class="two-col" style="margin-top:28px">
+    <div class="invariant">
+      <div class="t">불변식 — 이 한 줄이 나머지 전부를 지탱한다</div>
+      <div class="q">5번 검증의 바깥 층(5-b)은 외부여야 하고,<br>작업을 수행한 에이전트에게 위임할 수 없다.</div>
+      <p class="muted" style="margin:10px 0 0">기획에선 사람 + 출처 대조. 개발에선 전후 대조(diff) + 기준선 비교.<br><b style="color:var(--text)">나머지 전부가 속도가 나오는 자리다.</b></p>
+    </div>
+    <div class="card">
+      <h3>이 루프를 굴리는 사람 — 조율자</h3>
+      <p>조율자(orchestrator)는 흐름을 소유하되 <b>직접 일하지 않는다.</b> 사람이 조율자여도 되고 에이전트가 조율자여도 된다. 다만 <b>조율과 실행은 섞지 않는다.</b></p>
+      <p class="muted" style="margin:0">개발·기획·조사·보고서 어디에나 같은 모양. 특정 도구에 묶여 있지 않다.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ───────── AGENDA ───────── -->
+<section id="agenda"><div class="wrap">
+  <div class="kicker">로드맵</div>
+  <h2>오늘 두 시간 — 다섯 덩어리</h2>
+  <p class="lead">프레임은 하나, 층은 둘. 가운데 60분은 <b>같은 여덟 줄 프롬프트</b>로 기획과 개발을 한 번씩 돈다. <span class="muted">브레이크 없음.</span></p>
+  <div class="road">
+    <div class="seg b1" style="flex:30"><div class="t">0:00 – 0:30</div><h3>워크플로우와 검증</h3><p>6단계 루프 · 5번 두 층 · 사다리</p><p class="muted">전 직군 · 이 페이지를 위에서 아래로</p></div>
+    <div class="seg b2" style="flex:30"><div class="t">0:30 – 1:00</div><h3>기획·PM 데모</h3><p>로드맵 진척 대시보드</p><p class="muted">빈 폴더에서 시작 · 에이전트 로그 그대로</p></div>
+    <div class="seg b3" style="flex:30"><div class="t">1:00 – 1:30</div><h3>개발 데모</h3><p>제품 분석 계측</p><p class="muted">같은 제품, 다른 층 · 1,092줄 위에서</p></div>
+    <div class="seg b4" style="flex:15"><div class="t">1:30 – 1:45</div><h3>만능열쇠는 아니다</h3><p>메타에서 되는 것 · 안 되는 것 · 가져가실 것</p><p class="muted">다시 이 페이지로</p></div>
+    <div class="seg b5" style="flex:15"><div class="t">1:45 – 2:00</div><h3>Q&amp;A</h3><p>&nbsp;</p></div>
+  </div>
+  <div class="road-legend"><span><i class="b1"></i>블록 1·4 — 이 페이지</span><span><i class="b2"></i><i class="b3"></i>블록 2·3 — 로그 뷰어 pm-log · dev-log</span></div>
+</div></section>
+
+<!-- ───────── WHY ───────── -->
+<section id="why"><div class="wrap">
+  <div class="kicker">진단</div>
+  <h2>왜 AI가 기존 업무 프로세스에 안 녹는가</h2>
+  <p class="lead">설문 1위 고민(30.9%). 원인은 다섯 개지만 하나의 사슬로 연결돼 있다. <span class="muted">카드를 눌러 증상을 보세요.</span></p>
+  <div class="grid g3" id="whyCards"></div>
+  <div class="card" style="margin-top:16px">
+    <h3>한 줄 진단 — 사슬의 순서</h3>
+    <div class="chain">
+      <div class="c">④ 절차가 글로 없어서<small>넘길 대상이 없음</small></div><span class="ar">→</span>
+      <div class="c">① 칸 하나만 넘겼고<small>병목 아닌 곳 최적화</small></div><span class="ar">→</span>
+      <div class="c">② 매번 맥락을 다시 넣고<small>손해 누적</small></div><span class="ar">→</span>
+      <div class="c">③ 사람이 다 검증해서<small>생성 &lt; 검증 비용</small></div><span class="ar">→</span>
+      <div class="c" style="border-color:var(--danger)">총 시간이 안 줄었다</div>
+    </div>
+    <div class="callout danger"><p><b>위험 신호:</b> 맡겼는데 내가 직접 할 때와 시간이 비슷하거나 더 든다. — 이게 이 상태의 진단명이다.</p></div>
+    <p class="big-quote" style="margin-bottom:0">처방: 칸이 아니라 <span class="hl">절차 전체를 넘긴다.</span><br><span class="muted" style="font-size:19px;font-weight:600">그러려면 절차 · 컨텍스트 · 게이트가 한 벌이어야 한다. 그 한 벌이 아래 루프다.</span></p>
+  </div>
+</div></section>
+
+<!-- ───────── LOOP ───────── -->
+<section id="loop"><div class="wrap">
+  <div class="kicker">프레임</div>
+  <h2>6단계 루프 — 0 맥락 → 1 의도 → 2 스펙 → 3 분해 → 4 구현 → 5 검증 → 6 개선</h2>
+  <p class="lead">단계를 누르면 아래에 상세가 열린다. <kbd>←</kbd> <kbd>→</kbd> 로 이동. <span class="muted">오른쪽 스위치로 개발 / 비개발 재료를 나란히 본다.</span></p>
+
+  <div class="loop">
+    <div class="orch">조율자 ORCHESTRATOR — <b>흐름만 소유, 직접 실행하지 않는다</b></div>
+    <div class="row" id="loopRow"></div>
+    <div class="paths">
+      <span class="path a">5-a 반려 → 그 조각만 재시도 · 상한 K</span>
+      <span class="path b">5-b 반려 → 2번 스펙으로 되돌아간다</span>
+    </div>
+    <div class="ctxrow">
+      <div class="node ctx" data-i="0"><span class="who">👤</span><span class="n">0</span><span class="t">맥락</span><span class="s">규칙 파일 · 용어집<br>결정기록 · 미검증 가정</span></div>
+      <span class="fb" style="margin:0">◀ <b>되먹임</b> — 6번이 0번을 갱신하고, 0번이 다음 루프의 1번으로 들어간다 ▶</span>
+    </div>
+  </div>
+
+  <div class="detail" id="detail"></div>
+</div></section>
+
+<!-- ───────── VERIFY ───────── -->
+<section id="verify"><div class="wrap">
+  <div class="kicker">★ 핵심</div>
+  <h2>5번은 두 층이다</h2>
+  <p class="lead">대부분의 실패는 이 둘을 하나로 뭉갤 때 생긴다. 싸고 자동인 층과 비싸고 판가름이 나는 층은 <b>실패했을 때 되돌아가는 곳이 다르다.</b></p>
+  <div class="grid g2">
+    <div class="card" style="border-color:rgba(107,214,143,.5)">
+      <h3><span class="tag mach">기계</span>5-a 게이트</h3>
+      <dl class="kv" style="grid-template-columns:90px 1fr">
+        <dt>성격</dt><dd>싸다. 자동. <b>결정적</b>(deterministic) — 같은 입력이면 같은 답. 매 조각마다 돈다</dd>
+        <dt>무엇</dt><dd>테스트 · 타입 · 린트 · 완결성 스캔 · 출처 확인</dd>
+        <dt>실패 시</dt><dd><b>그 조각만 재시도. 상한 K=3~6.</b> 넘으면 멈추고 보고</dd>
+        <dt>함정</dt><dd><b>통과해도 맞다는 뜻이 아니다.</b> 초록불은 필요조건이지 충분조건이 아니다</dd>
+      </dl>
+    </div>
+    <div class="card verify">
+      <h3><span class="tag ext">외부</span>5-b 외부검증</h3>
+      <dl class="kv" style="grid-template-columns:90px 1fr">
+        <dt>성격</dt><dd>비싸다. <b>최종 판정</b>(ground truth). 사람·다른 모델의 판단이라 매번 같지는 않다</dd>
+        <dt>무엇</dt><dd>사람 리뷰 / 다른 모델 교차검증 / 전후 대조 / 기준선 비교</dd>
+        <dt>실패 시</dt><dd><b>2번(스펙)으로 되돌아간다.</b> 다시 쓰는 걸로 때우지 않는다</dd>
+        <dt>함정</dt><dd>작업한 쪽에 맡기는 순간 무의미해진다</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="callout"><p><b>AI → AI → AI → 사람.</b> 사람이 보던 지표를 문서화해 넘기면 사람 시간이 확 줄어든다. 교차검증은 필수 — 모델마다 학습·추론이 다르다. 그리고 <b>사람은 taste만</b> 본다: UI·UX · 비즈니스 맥락 · 디자인 · 아키텍처.</p>
+  <p><b>한계도 말할 것:</b> 두 에이전트가 같은 잘못된 전제를 공유하면 상호 검토도 실패한다. <b>평가 기준 자체도 감사 대상</b>이다.</p></div>
+
+  <h3 style="margin-top:34px">얼마나 검증할지는 위험도로 정한다</h3>
+  <div class="tw"><table>
+    <tr><th style="width:110px">위험</th><th>예시</th><th>5-b 심판</th></tr>
+    <tr><td><b>낮음</b></td><td>회의 요약 · 문장 다듬기</td><td>원문 대조 + 본인 확인</td></tr>
+    <tr><td><b>중간</b></td><td>인터뷰 분석 · 기획 초안 · 코드 리팩터링</td><td>출처 링크 + <b>반대 증거</b> + 도메인 리뷰어 1명</td></tr>
+    <tr><td><b>높음</b></td><td>우선순위 결정 · 지표 결론 · 스키마 변경</td><td>관련 팀 교차 검토 + 명시적 승인</td></tr>
+    <tr><td><b>매우 높음</b></td><td>가격 · 법무 · 개인정보 · 자동 실행</td><td>승인된 출처만 + 감사 로그 + 책임자 승인</td></tr>
+  </table></div>
+
+  <h3 style="margin-top:34px">기획 · 보고서에는 테스트가 없다고들 한다. <span class="hl">있다.</span></h3>
+  <div class="grid g3">
+    <div class="card"><h3><span class="num">1</span>출처 추적성</h3><p>모든 주장에 출처(링크 · 파일 · 쿼리 · 커밋)가 붙어 있나. <b>실제로 존재하나.</b></p><p class="muted" style="margin:0"><span class="tag mach">기계</span>붙어 있는지, 존재하는지는 기계가 센다</p></div>
+    <div class="card"><h3><span class="num">2</span>수치 재현성</h3><p>숫자를 다시 계산하면 같은 값이 나오나.</p><p class="muted" style="margin:0"><span class="tag mach">기계</span>+ AI. 이 세미나 준비 중 설문 분석을 교차검증해 <b>수치 6개를 정정</b>한 게 이 게이트다</p></div>
+    <div class="card"><h3><span class="num">3</span>스펙 대비 커버리지</h3><p>2번에서 정한 「각 섹션이 답해야 할 질문」에 다 답했나.</p><p class="muted" style="margin:0"><span class="tag ext">AI</span>스펙이 체크리스트였기에 가능하다</p></div>
+  </div>
+  <p class="big-quote">개발의 게이트는 이미 존재한다 — 테스트가 실제로 돈다.<br>비개발의 게이트는 <span class="hl">정의하는 순간 생긴다.</span> 정의하지 않으면 그 업무는 영원히 human 단계에 머문다.</p>
+</div></section>
+
+<!-- ───────── LADDER ───────── -->
+<section id="ladder"><div class="wrap">
+  <div class="kicker">자동화 사다리</div>
+  <h2>지금 어디에 서 있나 — 사람의 위치</h2>
+  <p class="lead">같은 루프 위에서 사람이 서 있는 칸만 달라진다. 단계를 고르면 위 다이어그램의 👤 위치가 바뀐다.</p>
+  <div class="ladder-steps" id="ladderSteps"></div>
+  <div class="loop" style="padding-top:18px">
+    <div class="row" id="ladderRow"></div>
+    <div class="ctxrow" id="ladderCtx"></div>
+  </div>
+  <div class="card" style="margin-top:16px" id="ladderText"></div>
+  <div class="callout ctx"><p><b>한 칸 올라가는 조건은 하나뿐이다.</b> 5-a를 객관적 지표로 정의해서 에이전트가 대신 수행할 수 있게 만들었을 때. 건너뛰고 바로 맨 위로 가면 장애가 난다. 순서대로 올라간다.</p></div>
+</div></section>
+
+<!-- ───────── PRINCIPLES ───────── -->
+<section id="principles"><div class="wrap">
+  <div class="kicker">설계 원칙</div>
+  <h2>버티는 워크플로우가 공유하는 7가지</h2>
+  <div class="grid g2" id="principles"></div>
+  <div class="card ctx" style="margin-top:16px">
+    <h3>그리고 투자 배분을 뒤집어라</h3>
+    <p><b>0번(맥락)과 5번(게이트)에 시간을 몰고, 4번(실행)은 짧게 끝난다.</b> 레거시를 옮길 때 <mark>테스트 만드는 데 몇 주, 실제 이관은 며칠</mark> — 이게 정상적인 배분이다.</p>
+    <p class="muted" style="margin:0">레거시의 본질은 코드가 아니라 <b style="color:var(--text)">비즈니스 컨텍스트 부족</b>(0번 결핍)이다. 그래서 답이 다시 0번으로 돌아온다.</p>
+  </div>
+</div></section>
+
+<!-- ───────── START ───────── -->
+<section id="start"><div class="wrap">
+  <div class="kicker">바로 쓰기</div>
+  <h2>채울 6칸 — 그리고 막힐 때의 기본값</h2>
+  <div class="tw"><table>
+    <tr><th style="width:140px">칸</th><th>채우는 법</th></tr>
+    <tr><td><b>목표</b></td><td>한 문장. 「무엇을 누구를 위해」</td></tr>
+    <tr><td><b>0번 파일</b></td><td>팀 규칙 · 용어집 경로. <b>없으면 아래 부트스트랩으로 10분 만에 만든다</b></td></tr>
+    <tr><td><b>5-a 게이트</b></td><td>아래 직군별 기본값</td></tr>
+    <tr><td><b>5-b 심판</b></td><td>아래 직군별 기본값</td></tr>
+    <tr><td><b>완료 정의</b></td><td>무엇이 나와 있으면 끝인가. <b>여기가 흐리면 루프가 안 닫힌다</b></td></tr>
+    <tr><td><b>재시도 상한</b></td><td>K=3 (문서 · 분석) / K=6 (코드)</td></tr>
+  </table></div>
+
+  <h3 style="margin-top:34px">직군별 기본값 — 생각 안 하고 시작할 수 있어야 실제로 쓴다</h3>
+  <div class="tw"><table>
+    <tr><th>업무</th><th><span class="tag mach">기계</span>5-a 게이트</th><th><span class="tag ext">외부</span>5-b 심판</th></tr>
+    <tr><td><b>코드 변경</b></td><td>린트 · 타입 체크 · 유닛 테스트</td><td>변경 전후 출력 대조 + 다른 모델 리뷰 + 사람</td></tr>
+    <tr><td><b>보고서 · 기획</b></td><td>스펙 대비 커버리지 · 출처 추적성 · 수치 재현성</td><td>도메인 오너 + 데이터 오너</td></tr>
+    <tr><td><b>데이터 분석</b></td><td>쿼리 재실행 시 같은 값 · 기간 · 행 수 일치</td><td>원본을 소유한 팀 + 다른 모델로 재계산</td></tr>
+    <tr><td><b>문서 요약</b></td><td>원문 대조 — 모든 문장이 원문에 실제로 있나</td><td>원문 작성자</td></tr>
+    <tr><td><b>리서치 · 조사</b></td><td>모든 주장에 출처 링크가 있고 접속되나</td><td>다른 모델 교차검증 + 사람</td></tr>
+  </table></div>
+
+  <div class="two-col" style="margin-top:34px">
+    <div>
+      <h3>0번 파일이 없을 때 — 10분 부트스트랩</h3>
+      <p>대부분 여기서 막힌다. <b>넘길 절차가 애초에 글로 없기 때문이다.</b> 이 6줄로 시작한다.</p>
+      <ul style="padding-left:1.1em;margin:0">
+        <li><b>완벽하게 쓰려 하지 말 것.</b> 한 번 돌리고 6번에서 되먹이면서 자란다.</li>
+        <li><b><code>미검증 가정</code>이 가장 값싸고 강력한 칸.</b> 에이전트가 추측을 사실로 굳히는 걸 여기서 막는다.</li>
+        <li>폴더를 나눈다면 <b>갱신 주기</b>로 나눈다 — 계속 쌓이는 원자료 / 사람이 결정할 때만 고치는 맥락 자산.</li>
+      </ul>
+    </div>
+    <div class="prewrap">
+      <button class="copy" data-copy="boot">복사</button>
+<pre id="boot"># 팀 규칙 (0번 맥락)
+
+## 용어         우리끼리만 쓰는 말과 그 뜻.
+## 자료 위치     어떤 자료가 어디에 있나. 원본과 가공본.
+## 결정 기록     언제 무엇을 왜 그렇게 정했나. 되돌리면 안 되는 것.
+## 출력 형식     보고서·문서·코드의 표준 모양. 예시 하나.
+## 금지          하지 말 것, 건드리면 안 되는 것.
+## 미검증 가정   아직 확인 못 한 것.
+                ★ 여기 있는 걸 사실처럼 쓰지 말 것.</pre>
+    </div>
+  </div>
+</div></section>
+
+<!-- ───────── CASES ───────── -->
+<section id="cases"><div class="wrap">
+  <div class="kicker">사례 A · B</div>
+  <h2>같은 프레임, 다른 심판</h2>
+  <p class="lead"><span class="tag pm">A</span>기획 · PM — 문제정의 → 프로토타입, 하루 안에. &nbsp; <span class="tag dev">B</span>엔지니어 — 운영 중인 서비스에 신규 기능을 플래그 뒤에 점진 배포.</p>
+  <div class="tabs" id="caseTabs"></div>
+  <div class="case" id="caseBody"></div>
+
+  <h3 style="margin-top:38px">나란히 놓고 보기</h3>
+  <div class="tw"><table id="sideTable">
+    <tr><th style="width:120px">단계</th><th><span class="tag pm">A</span>기획 · PM</th><th><span class="tag dev">B</span>엔지니어</th></tr>
+    <tr><td><b>0 맥락</b></td><td>용어집 · 결정기록 · 자료 위치 · 보고서 포맷</td><td>규칙 파일 · 가장 가까운 기존 패턴</td></tr>
+    <tr><td><b>1 의도</b></td><td>설계를 바꿀 질문 5개를 <b>먼저 받는다</b></td><td>정확한 스펙 + 복제할 패턴 지목</td></tr>
+    <tr><td><b>2 스펙</b></td><td>섹션별 답해야 할 질문 + 근거 요건</td><td>인수 조건을 <b>테스트 이름 목록</b>으로</td></tr>
+    <tr><td><b>3 분해</b></td><td>조사 → 문서 → 프로토타입</td><td>정의 → 배선 → 플래그 → 머지 → 점진 배포</td></tr>
+    <tr><td><b>4 구현</b></td><td>조사 ∥ 경쟁분석, 이후 문서 → 목업</td><td>생성 ∥ 테스트, 이후 정의 → 배선</td></tr>
+    <tr><td><b>5-a 게이트</b></td><td>완결성 · 출처 추적성 · 수치 재현성 · 스모크</td><td>린트 · 타입 · 유닛 테스트</td></tr>
+    <tr style="background:rgba(255,180,84,.08)"><td><b>5-b 심판</b></td><td><b>사람 리뷰 + 출처 대조</b></td><td><b>전후 diff + 기준선 비교</b></td></tr>
+    <tr><td><b>6 개선</b></td><td>문서 · 프로토타입 배포, 용어 · 결정을 0번에</td><td>초안 PR → 머지 게이트 → 점진 배포, 기록</td></tr>
+  </table></div>
+  <p class="big-quote">다른 칸은 <span class="hl">5-b 하나뿐</span>이다. 나머지는 전부 같은 모양이다.</p>
+</div></section>
+
+<!-- ───────── WHEN NOT ───────── -->
+<section id="when"><div class="wrap">
+  <div class="kicker">정직하게</div>
+  <h2>언제 쓰지 말아야 하나</h2>
+  <div class="grid g4">
+    <div class="card"><h3>5분이면 끝나는 일</h3><p class="muted" style="margin:0">조율 오버헤드가 일보다 크다. 그냥 하라.</p></div>
+    <div class="card"><h3>5-b 심판을 정할 수 없는 일</h3><p class="muted" style="margin:0">검증할 방법이 없으면 아무리 돌려도 신뢰가 쌓이지 않는다. 먼저 심판부터 찾아라.</p></div>
+    <div class="card"><h3>정답이 하나가 아닌 창작</h3><p class="muted" style="margin:0">taste가 전부인 영역. 게이트가 오히려 방해가 된다.</p></div>
+    <div class="card"><h3>한 번만 하고 버릴 일</h3><p class="muted" style="margin:0">6번의 되먹임이 회수될 기회가 없다.</p></div>
+  </div>
+  <div class="callout danger" style="margin-top:18px"><p><b>위험 신호:</b> 맡겼는데 내가 직접 할 때와 시간이 비슷하거나 더 든다.<br>그러면 루프가 잘못된 게 아니라 <b>0번이 비어 있거나 5-a가 정의돼 있지 않은 것</b>이다. 그 둘을 먼저 보라.</p></div>
+
+  <h3 style="margin-top:34px">넣기 전에 확인할 것</h3>
+  <div class="grid g3">
+    <div class="card"><p style="margin:0"><b>사내 자료를 에이전트에 넣기 전에 회사 정책을 확인한다.</b> 0번 파일에 기밀 · 개인정보 · 자격증명을 담지 않는다. 담아야 한다면 참조 위치만 적고 값은 넣지 않는다.</p></div>
+    <div class="card"><p style="margin:0"><b>에이전트가 만든 스크립트와 스킬은 실행되는 코드다.</b> 읽지 않고 돌리지 않는다. 남이 만든 것을 그대로 가져다 쓸 때는 특히.</p></div>
+    <div class="card"><p style="margin:0"><b>5-b를 생략한 결과물을 외부에 내보내지 않는다.</b> 초록불은 통과의 증거가 아니다.</p></div>
+  </div>
+</div></section>
+
+<!-- ───────── TEMPLATE ───────── -->
+<section id="template"><div class="wrap">
+  <div class="kicker">드롭인 조율자 템플릿</div>
+  <h2>복사해서 붙여넣는다 — 맨 아래 <span class="hl">6칸</span>만 채우면 시작된다</h2>
+  <p class="lead">에이전트 대화창에 통째로 넣어도 되고, 팀 저장소에 두고 에이전트가 읽게 해도 된다. <b>후자를 권장한다</b> — 팀이 같이 고쳐 나가는 0번 자산이 된다.</p>
+  <div class="prewrap">
+    <button class="copy" data-copy="tpl">템플릿 복사</button>
+<pre id="tpl">역할: 너는 조율자(ORCHESTRATOR)다. 흐름만 관리하고, 직접 실행하지 않는다.
+
+[0] 맥락  — 먼저 이 파일들을 읽는다: <span class="slot">&lt;규칙/스펙 파일 경로&gt;</span>
+            여기에 없는 규칙은 지어내지 말고, 1번에서 질문으로 올린다.
+
+[1] 의도  — 목표와 제약을 네 말로 다시 진술한다. 가정을 전부 나열한다.
+            그중 결과를 바꾸는 가정이 있으면 **멈추고 나에게 묻는다.**
+            통과 조건: 결과를 바꾸는 미지수가 남아 있지 않다.
+
+[2] 스펙  — 목적지를 확정한다. 반드시 5번에서 그대로 쓸 **체크리스트 형태**로 쓴다.
+            체크리스트로 바꿀 수 없는 항목은 스펙이 아니다 → 1번으로 되돌린다.
+
+[3] 분해  — N개 조각으로 쪼갠다. 조각마다 의존성과 성공 판정을 붙인다.
+            한 조각 = 서브에이전트 한 세션에 들어가는 크기.
+            독립 조각은 병렬로 표시한다. 사소하지 않으면 계획 리뷰를 한 번 넣는다.
+
+[4] 구현  — 조각마다 서브에이전트를 띄운다. 프롬프트는 자족적으로 —
+            앞 단계 결과를 본문에 통째로 넣는다. 중간에 되묻게 하지 않는다.
+            독립 조각은 동시에 띄운다.
+
+[5] 검증  — 5-a 게이트(싸고 자동): <span class="slot">&lt;게이트 명령 또는 체크리스트&gt;</span>
+              실패 → 그 조각만 재시도. **상한 K=<span class="slot">&lt;3~6&gt;</span>. 넘으면 멈추고 보고한다.**
+              통과해도 "맞다"는 뜻이 아니다. 반드시 5-b로 간다.
+            5-b 외부검증(비싸고 최종 판정): <span class="slot">&lt;외부 심판&gt;</span>
+              작업을 수행한 에이전트에게 채점을 맡기지 않는다.
+              실패 → **2번(스펙)으로 되돌아간다.** 다시 쓰는 걸로 때우지 않는다.
+
+[6] 개선  — 산출물을 낸다. 무엇을 어떻게 만들었는지 기록한다.
+            드러난 실패 패턴과 새 규칙을 0번 파일에 되먹인다.
+            파이프라인 중간이면 "이 단계 완료"는 체크포인트일 뿐이다 —
+            나에게 돌려주고 다음 단계를 기다린다.
+
+규칙
+- 모든 재시도 루프에 상한을 둔다.
+- 서브에이전트에는 맥락을 전부 준다.
+- 독립 단계는 병렬로 돌린다.
+- 작업자가 자기 정확성을 채점하게 두지 않는다.
+- 0번에 없는 규칙을 지어내지 않는다. 모르면 멈추고 묻는다.
+- 확실한 것과 추측을 구분해서 말한다. 추측을 사실처럼 쓰지 않는다.
+- 단계를 건너뛰지 않는다. 각 단계 끝에서 현재 위치를 한 줄로 보고한다.
+
+── 이번 작업 ──────────────────────────────
+목표:        <span class="slot">&lt;한 문장&gt;</span>
+0번 파일:    <span class="slot">&lt;경로들. 없으면 "없음 — 1번에서 같이 만들자"&gt;</span>
+5-a 게이트:  <span class="slot">&lt;실제 명령 또는 체크리스트&gt;</span>
+5-b 심판:    <span class="slot">&lt;사람 / 다른 모델 교차검증 / 전후 diff / 기준선 비교&gt;</span>
+완료 정의:   <span class="slot">&lt;무엇이 나와 있으면 끝인가&gt;</span>
+재시도 상한: K=<span class="slot">&lt;3~6&gt;</span></pre>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>실제로 넘긴 프롬프트는 8줄이었다</h3>
+    <p class="muted">설계(범위 · 게이트 · 심판)는 미리 채우지 않는다. 에이전트가 <b style="color:var(--text)">1번에서 질문으로 끄집어내는 장면</b>이 곧 워크플로우다.</p>
+<pre style="font-size:14px">&lt;플레이북 경로&gt; 를 읽고, 그 안의 "드롭인 조율자 템플릿"대로 행동한다.
+
+나는 AutoKliq의 기획자다. 코드를 쓰지 않고, 저장소를 고치지 않는다(읽기는 된다).
+
+목표: AutoKliq의 로드맵 대비 지난 분기 진척을 이해관계자가 파악할 수 있는 대시보드를 만든다.
+나머지 5칸(0번 파일 · 5-a · 5-b · 완료 정의 · K)은 1번에서 나에게 물어서 채워라.
+
+- 각 단계가 끝나면 멈추고 내 승인을 기다린다.
+- .env 계열 파일을 열지 않는다. 키·토큰이 보이면 &lt;REDACTED&gt;로 쓴다.</pre>
+  </div>
+</div></section>
+
+<!-- ───────── SKILL ───────── -->
+<section id="skill"><div class="wrap">
+  <div class="kicker">산출물로의 접합</div>
+  <h2>이 루프는 스킬 한 장으로 고정된다</h2>
+  <p class="lead">스킬의 4겹이 6단계를 담는다. SKILL.md는 코드가 아니라 자연어 절차서 — <b>비개발자가 읽고 고칠 수 있다.</b> 그래서 개발자와 비개발자에게 <b>같은 형태의 산출물</b>을 줄 수 있다.</p>
+  <div class="grid g4">
+    <div class="card"><h3><span class="num">①</span>절차</h3><p class="muted" style="margin:0">1 의도 ~ 4 구현</p></div>
+    <div class="card ctx"><h3><span class="num">②</span>컨텍스트 참조</h3><p class="muted" style="margin:0">0 맥락</p></div>
+    <div class="card verify"><h3><span class="num">③</span>검증 게이트</h3><p class="muted" style="margin:0">5 검증 — <b style="color:var(--text)">초보 스킬에 없는 것</b></p></div>
+    <div class="card"><h3><span class="num">④</span>실패 처리</h3><p class="muted" style="margin:0">5의 반려 + 6 개선</p></div>
+  </div>
+  <div class="callout" style="margin-top:20px"><p><b>승격 경로.</b> 나의 불편함 → 개선 → 스킬. 팀의 불편함 → 스킬로 테스트 → <b>실패 → 개선 → 반복</b> → 팀 자산. 스킬도 실행되는 코드다 — 읽지 않고 돌리지 않는다.</p></div>
+  <p class="big-quote" style="margin-top:30px">AI를 업무에 녹이는 법과, 녹인 뒤 믿는 법.<br><span class="muted" style="font-size:20px;font-weight:600">검증하는 사람이 이기는 시대.</span></p>
+</div></section>
+
+<footer><div class="wrap">이 문서는 0번 파일의 일부다. 팀에서 쓰면서 겪은 실패와 새 규칙을 여기에 되먹여라. · 삼성전자 DX 세미나 2차</div></footer>
+
+<script>
+/* ───────── DATA ───────── */
+const STAGES = [
+ {n:"0",t:"맥락",s:"규칙 · 용어집 · 결정기록",cls:"ctx",
+  what:"규칙 파일, 용어집, 결정기록, 자료 위치. 매번이 아니라 한 번, 이후 자산. 플레이북의 「rules file」은 이것의 부분집합 — 우리는 미검증 가정까지 갱신 주기를 갖는 자산으로 본다.",
+  pass:"에이전트가 이 파일만 읽고 일을 시작할 수 있다.",
+  fail:"— (6번이 여기로 되먹인다)",
+  out:"세컨드브레인 · 컨텍스트 인터페이스",
+  dev:"CLAUDE.md / AGENTS.md · 코드 맵 · ADR · 가장 가까운 기존 패턴",
+  pm:"팀 용어집 · 과거 기획과 결정 기록 · 자료 위치 · 보고서 포맷",
+  why:"설문 순위 4 — 「개념 설명보다 폴더 구조 · 데이터 관리 주기」. 팀 컨텍스트의 퀄리티가 모든 답의 수렴점.",
+  human:"on the loop 에서도 사람이 관리하는 칸"},
+ {n:"1",t:"의도",s:"범위 · 제약 · 먼저 묻기",
+  what:"애매함을 행동 전에 없앤다. 가정을 글로 적고, 불확실하면 묻는다. 만들어진 답과 낭비를 줄이는 가장 싼 방법.",
+  pass:"결과를 바꾸는(load-bearing) 미지수가 남아 있지 않다.",
+  fail:"—",
+  out:"합의된 목표 · 제약 · 명시된 가정 (context.md)",
+  dev:"무엇을 왜 만드는가. 정확한 출처 · 타입 · 흐름 · 엣지 케이스. 복제할 기존 패턴 지목",
+  pm:"이 문서 왜 쓰나, 누가 읽나, 뭘 결정하게 하려는가. 「설계를 가장 크게 바꿀 질문 5개를 나에게 물어봐라」",
+  why:"Matt Pocock 「Grill」. 에이전트가 질문 없이 요구사항을 그대로 받아적고 그럴듯하게 채우는 것이 심어둘 실패 #1.",
+  human:"human in the loop 에서 사람이 서는 첫 번째 칸 — 에이전트가 끄집어낸 미지수에 답한다"},
+ {n:"2",t:"스펙",s:"채점표 = 5의 기준",
+  what:"합의된 목적지. 나중에 5번 검증의 채점표가 된다. 체크리스트로 바꿀 수 없는 항목은 스펙이 아니다.",
+  pass:"전 항목이 체크리스트로 바뀐다.",
+  fail:"1번으로 — 의도가 덜 잡힌 것",
+  out:"스펙 · 사실 / 가설 / 결정 / 미지수 분리",
+  dev:"인수 조건을 테스트 이름 목록으로. 가까운 패턴이 있으면 새 방식을 발명하지 않는다",
+  pm:"목차 + 각 섹션이 답해야 할 질문 + 근거 요건. 사실 · 가설 · 결정 · 미지수를 분리",
+  why:"「루프의 핵심은 목표설정과 검증」— 2번이 5번의 기준이 되는 것이 루프의 뼈대.",
+  human:"human in the loop 에서 사람이 서는 두 번째 칸 — 목적지를 합의한다"},
+ {n:"3",t:"분해",s:"한 세션 크기 · 의존성",
+  what:"의존성이 명시된 조각으로. 한 조각 = 한 세션에 들어가는 크기. 독립 조각은 병렬. 사소하지 않으면 계획 리뷰 한 번.",
+  pass:"조각마다 성공 판정이 붙어 있다.",
+  fail:"2번으로 — 스펙이 조각으로 안 쪼개지는 것",
+  out:"티켓 · 단계 파이프라인",
+  dev:"티켓 = 한 세션. 게이트가 박힌 단계 파이프라인: 정의 → 배선 → 플래그 → 머지 → 점진 배포",
+  pm:"섹션별 · 데이터 소스별. 한 번에 다 쓰지 않는다. 뭘 진짜로 만들고 뭘 가짜로 둘지 명시",
+  why:"Matt 「smart zone」/ 순위 6. 컨텍스트 창에 맞게 분해 — 작고 좁은 프롬프트가 더 정확하고 싸고 디버깅된다.",
+  human:"순위 3 미답 「에이전트 분할 기준」의 답이 여기"},
+ {n:"4",t:"구현",s:"서브에이전트 · 병렬",
+  what:"조율자가 조각마다 서브에이전트를 띄운다. 프롬프트는 자족적 — 앞 단계 결과를 본문에 통째로. 중간에 되물을 수 없다. 독립 조각은 동시에.",
+  pass:"조각이 스펙대로 나왔다.",
+  fail:"3번으로 — 조각이 잘못 잘린 것",
+  out:"구현물",
+  dev:"티켓 하나 = 세션 하나. 하네스(훅 · 스킬 · 컨텍스트 · 도구)가 작동. 병렬은 branch · worktree",
+  pm:"섹션 하나씩 분석 · 작성. 데이터 기반은 에이전트가 가장 잘하는 영역",
+  why:"순위 3 미답 「변수 통제」— 조율자는 실행하지 않고, 프롬프트는 자족적이므로 변수가 고정된다.",
+  human:"사람이 가장 적게 서 있어야 하는 칸"},
+ {n:"5",t:"검증",s:"5-a 게이트 → 5-b 외부",cls:"v",
+  what:"5-a 게이트(싸고 자동, 기계) → 5-b 외부검증(비싸고 최종 판정, AI 교차 + 사람 taste). 작업한 에이전트가 자기 결과를 채점하지 않는다.",
+  pass:"5-a 전부 통과 + 5-b 승인. 통과해도 「맞다」는 뜻이 아니다.",
+  fail:"5-a 실패 → 그 조각만 재시도, 상한 K. / 5-b 실패 → 2번 스펙으로. 재작성으로 때우지 않는다",
+  out:"통과 / 반려 + 검증 리포트",
+  dev:"린트 · 타입 · 유닛 테스트 → 전후 diff · 기준선 비교 → 다른 모델 리뷰 → 사람 taste",
+  pm:"출처 추적성 · 수치 재현성 · 스펙 커버리지 → 다른 모델 교차검증 → 도메인 · 데이터 오너",
+  why:"순위 2 전체. 「AI→AI→AI→사람」, 「사람은 taste만」. 순위 3 미답 「무한 루프 탐지」의 답 = 상한 K.",
+  human:"human in the loop 에서 사람이 서는 세 번째 칸. on the loop 에선 자동으로 돈다"},
+ {n:"6",t:"개선",s:"배포 · 기록 · 되먹임",
+  what:"산출물을 내고, 무엇을 어떻게 했는지 기록한다. 실패 패턴과 새 규칙을 0번으로 되먹인다. 파이프라인 중간이면 「이 단계 완료」는 체크포인트일 뿐.",
+  pass:"다음 루프가 더 빨라질 근거가 0번에 남았다.",
+  fail:"—",
+  out:"갱신된 0번 · 궤적 기록",
+  dev:"실패 패턴 · 새 규칙. 메모리 업데이트로 끝낼지, root cause를 고칠지 판단. 머지는 체크포인트지 끝이 아니다",
+  pm:"새로 정의된 용어 · 쓴 데이터의 위치 · 반복될 섹션 · 반려된 선택지 · 미검증으로 남은 항목",
+  why:"이번 세미나의 정체성. 1차의 루프엔 지식 축적 단계가 없었다. 6번이 없으면 매번 처음부터.",
+  human:"사람이 발견한 실패는 더 심각 — 메모리 갱신보다 root cause를 고치는 습관"}
+];
+
+const WHY = [
+ {t:"AI를 「절차」가 아니라 「칸」에 끼워넣는다",s:"한 칸만 빨라지고 전체는 그대로. 병목이 아닌 곳을 최적화한다."},
+ {t:"맥락 재입력 비용이 매번 발생",s:"매번 팀 · 프로젝트 설명을 다시. 반복될수록 손해가 누적된다."},
+ {t:"검증 비용 > 생성 비용",s:"만들기는 빨라졌는데 다 읽어야 해서 순손실."},
+ {t:"넘길 절차가 애초에 글로 없다",s:"팀이 자기 절차를 모름. 녹일 대상이 정의돼 있지 않다."},
+ {t:"혼자 바꿀 수 없다",s:"앞뒤 사람이 그대로면 전체가 안 바뀐다."}
+];
+
+const PRINCIPLES = [
+ ["조율자는 순수 조율자다","띄우고 흐름만 관리한다. 직접 명령을 실행하거나 코드를 쓰지 않는다."],
+ ["서브에이전트 프롬프트는 자족적이다","앞 단계 결과를 본문에 통째로 넣는다. 실행 중에 되묻게 하지 않는다."],
+ ["독립 단계는 병렬로",""],
+ ["모든 재시도 루프에 상한을 둔다","상한 없는 루프는 조용히 시간을 태운다."],
+ ["0번 파일이 곧 제품이다","잘 다듬은 0번이 ROI가 가장 높다. 내 의도와 에이전트 행동 사이의 지속되는 접점."],
+ ["평가가 플라이휠이다","믿을 만한 검증이 신뢰를 만들고, 신뢰가 도입을 만든다."],
+ ["컨텍스트 창에 맞게 분해하라","작고 좁은 프롬프트가 더 정확하고, 더 싸고, 디버깅이 된다."]
+];
+
+const LADDER = [
+ {k:"human",t:"human",s:"0~6 전부 사람이 한다",human:[0,1,2,3,4,5,6],auto:[],
+  d:"AI를 쓰긴 하지만 모든 칸에 사람이 붙어 있다. 검증도 사람이 다 읽는다. 여기서 「내가 하는 것과 시간이 비슷하다」가 나온다."},
+ {k:"in",t:"human in the loop",s:"사람이 1(의도)·2(스펙)·5(검증)에 선다",human:[1,2,5],auto:[],
+  d:"에이전트가 끄집어낸 미지수에 답하고(1), 목적지를 정하고(2), 결과를 판정한다(5). 나머지는 에이전트. 대부분의 팀이 안정적으로 도달할 수 있는 칸이며, 세미나의 두 데모가 이 위치다."},
+ {k:"on",t:"human on the loop",s:"사람은 0과 2만 관리. 5는 자동으로 돈다",human:[0,2],auto:[5],
+  d:"5-a를 객관 지표로 정의해 에이전트가 수행하므로 사람은 규칙(0)과 기준(2)만 손본다. 바로 여기로 점프하면 장애가 난다 — 사다리는 순서대로."}
+];
+
+const CASES = {
+ "0 맥락":{pm:["팀 용어집 · 과거 기획과 결정 기록 · 자료 위치 · 보고서 포맷","없으면 10분 부트스트랩으로 먼저 만든다"],
+           dev:["프로젝트 규칙 파일에 컨벤션이 이미 있다 — 네이밍, 플래그 패턴, 테스트 형태, 리뷰 기본값","<b>가장 최근의 유사 기능</b>을 찾아 템플릿으로 삼는다"]},
+ "1 의도":{pm:["조율자는 나. 첫 프롬프트: <i>「[기능]의 문제정의를 하려고 한다. 계획하기 전에, <b>설계를 가장 크게 바꿀 질문 5개</b>를 나에게 물어봐라.」</i>","에이전트가 미지수를 끄집어낸다 — 사용자는 누구 / 핵심 지표 정의 / 읽기 전용인가 행동 가능한가 / 개인정보 제약 / 처음 낼 범위","내가 답한다 → <b>가정이 명시적으로 글이 된다</b>","▸ 통과: 결과를 바꾸는 미지수가 남아 있지 않다"],
+           dev:["필드의 정확한 출처, 타입, 어디로 흘러가는지, 엣지 케이스","인수 조건을 확정한다","▸ 통과: 스펙이 모호하지 않고, <b>복제할 기존 패턴이 지목돼 있다</b>"]},
+ "2 스펙":{pm:["구조: 문제 → 사용자 → 목표/비목표 → 요구사항 → 성공 지표 → 리스크","<b>각 섹션이 답해야 할 질문과 근거 요건</b>을 함께 적는다 ← 이게 5번의 채점표","<b>사실 / 가설 / 결정 / 미지수를 분리</b>해서 쓴다. 섞이는 순간 검증이 불가능해진다"],
+           dev:["인수 조건을 <b>테스트 이름 목록</b>으로 바꾼다. 바꿀 수 없으면 스펙이 아니다","가까운 패턴이 있으면 <b>새 방식을 발명하지 않는다</b> — 가드 · 에러 처리 · 테스트 형태를 그대로 복제"]},
+ "3 분해":{pm:["조사 → 문서 초안 → 프로토타입. 섹션별 · 데이터 소스별로 쪼갠다","의존성: 요구사항이 확정돼야 프로토타입이 <b>진짜 요구사항을 반영</b>한다","프로토타입 범위에 <b>무엇을 진짜로 만들고 무엇을 가짜로 둘지 명시</b>. 안 적으면 데모에서 사고가 난다"],
+           dev:["게이트가 박힌 단계 파이프라인: 필드 정의 → 배선 → 생성 코드 재생성 → 플래그 게이트 + 테스트 → 변경 열기 → 머지 게이트 → 점진 배포","<b>단계마다 자기 게이트를 갖는다.</b> 손으로 끌고 가지 말고 조율자가 전진시킨다"]},
+ "4 구현":{pm:["병렬 — (A) 조사 에이전트가 선행 사례와 가용 데이터 / (B) 다른 에이전트가 경쟁 분석","순차 — 문서 에이전트가 조사 결과를 <b>본문에 통째로 받아</b> 초안 → 확정 요구사항을 클릭되는 목업으로"],
+           dev:["병렬 — (A) 생성물 갱신 / (B) 플래그 테스트 3종(정상 · 빈 입력 · 플래그 꺼짐)","순차 — 필드 정의 → 배선 → 플래그 게이트. 각 프롬프트가 스펙 전문을 안고 간다","테스트 순서: 기존 테스트 탐색 → 커버리지 확인 → 케이스 브레인스토밍 → 계획 리뷰 → 구현 → 정합성 확인"]},
+ "5 검증":{pm:["<b>5-a</b> 완결성 스캔 · 출처 추적성(모든 주장에 링크 · 파일 · 쿼리) · 수치 재현성 · 프로토타입 스모크. <b>실패 → 초안으로, 최대 3회</b>","<b>5-b</b> <b>사람 이해관계자 리뷰. 에이전트에게 자기 문서를 채점시키지 않는다.</b> 데이터 오너에게 「이 신호가 실재하고 접근 가능한가」, 고객 접점 동료에게 「진짜 아픈 문제인가」. 모든 사실 주장이 <b>지어낸 게 아닌 실제 출처</b>로 역추적되나","<b>실패 → 2번(스펙)으로.</b> 요구사항이 틀린 것이지 초안이 부족한 게 아니다"],
+           dev:["<b>5-a</b> 손댄 코드에 린트 · 타입 · 유닛 테스트. <b>실패 → 구현 서브에이전트로, 상한 6회.</b> 초록불 게이트 — 필요조건이지 충분조건이 아니다","<b>5-b</b> <b>전후 대조.</b> 생성 코드나 출력 형식이 바뀌었으면 변경 전후를 돌려서 직접 diff. 에이전트가 「안전합니다」라고 한 말을 믿지 않는다 — <b>자기가 검증한 코드 생성</b>은 조용한 회귀의 고전적 출처","<b>실데이터 기준선 비교</b>. 심판은 diff와 기준선이지 에이전트가 아니다","실패 → 배선이 틀렸으면 3번, 로직이 틀렸으면 2번"]},
+ "6 개선":{pm:["문서를 내고 프로토타입 링크를 붙인다","<b>새 용어 · 쓴 데이터의 위치 · 반려된 선택지 · 미검증으로 남은 항목</b>을 0번에 기록한다","효과: 초안 · 선행조사 · 목업이 시간 단위로. 내 시간은 <b>1 의도</b>와 <b>5-b</b>에 몰린다"],
+           dev:["<b>머지는 체크포인트지 끝이 아니다.</b> 초안 PR → 리뷰어 승인 → 점진 배포(작은 % → 100%, 한 단계씩, 각 단계에 게이트)","겪은 장애의 근본 원인과 새 규칙을 0번에 남긴다. 다음 유사 기능이 그대로 재사용","효과: 기계적인 일이 병렬화된다. 내 주의는 <b>1 의도</b>와 <b>5-b</b> — 에이전트에게 자가 점검을 맡길 수 없는 두 곳에 집중"]}
+};
+
+/* ───────── RENDER ───────── */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+// WHY cards
+$("#whyCards").innerHTML = WHY.map((w,i)=>`<div class="card" data-why="${i}" style="cursor:pointer"><h3><span class="num">${i+1}</span>${w.t}</h3><p class="muted why-s" hidden>${w.s}</p></div>`).join("");
+$$("[data-why]").forEach(c=>c.addEventListener("click",()=>{const p=c.querySelector(".why-s");p.hidden=!p.hidden;}));
+
+// PRINCIPLES
+$("#principles").innerHTML = PRINCIPLES.map((p,i)=>`<div class="card"><h3><span class="num">${i+1}</span>${p[0]}</h3>${p[1]?`<p class="muted" style="margin:0">${p[1]}</p>`:""}</div>`).join("");
+
+// LOOP nodes (1~6 in row; 0 is in ctxrow)
+function nodeHTML(st,i){return `<div class="node ${st.cls||""}" data-i="${i}"><span class="who">👤</span><span class="n">${st.n}</span><span class="t">${st.t}</span><span class="s">${st.s}</span></div>`;}
+const rowEl=$("#loopRow");
+rowEl.innerHTML = STAGES.slice(1).map((st,k)=>nodeHTML(st,k+1)).join(`<span class="arrow">→</span>`);
+
+let cur=0, view="both";
+function renderDetail(){
+  const st=STAGES[cur];
+  $$("#loop .node").forEach(n=>n.classList.toggle("on",+n.dataset.i===cur));
+  const two = view==="both"
+    ? `<div class="two"><div><b style="color:var(--dev)">개발</b>${st.dev}</div><div><b style="color:var(--pm)">비개발 · 기획</b>${st.pm}</div></div>`
+    : view==="dev" ? `<div class="two" style="grid-template-columns:1fr"><div><b style="color:var(--dev)">개발</b>${st.dev}</div></div>`
+    : `<div class="two" style="grid-template-columns:1fr"><div><b style="color:var(--pm)">비개발 · 기획</b>${st.pm}</div></div>`;
+  $("#detail").innerHTML = `
+    <div class="hd"><span class="big"><span style="color:${st.cls==="ctx"?"var(--ctx)":st.cls==="v"?"var(--verify)":"var(--accent)"}">${st.n}</span> ${st.t}</span><span class="sub">${st.s}</span>
+      <span style="margin-left:auto" class="seg" id="viewSeg"><button data-v="both" class="${view==="both"?"on":""}">둘 다</button><button data-v="dev" class="${view==="dev"?"on":""}">개발</button><button data-v="pm" class="${view==="pm"?"on":""}">비개발</button></span></div>
+    <dl class="kv">
+      <dt>하는 일</dt><dd>${st.what}</dd>
+      <dt>통과 조건</dt><dd><b>${st.pass}</b></dd>
+      <dt>실패하면</dt><dd>${st.fail}</dd>
+      <dt>산출물</dt><dd>${st.out}</dd>
+      <dt>재료</dt><dd>${two}</dd>
+      <dt>근거 · 연결</dt><dd class="muted">${st.why}</dd>
+      <dt>사람의 위치</dt><dd class="muted">${st.human}</dd>
+    </dl>`;
+  $$("#viewSeg button").forEach(b=>b.addEventListener("click",()=>{view=b.dataset.v;renderDetail();}));
+}
+$$("#loop .node").forEach(n=>n.addEventListener("click",()=>{cur=+n.dataset.i;renderDetail();}));
+document.addEventListener("keydown",e=>{
+  if(e.target.closest("input,textarea"))return;
+  if(e.key==="ArrowRight"){cur=(cur+1)%7;renderDetail();}
+  if(e.key==="ArrowLeft"){cur=(cur+6)%7;renderDetail();}
+});
+renderDetail();
+
+// LADDER
+let lad=1;
+$("#ladderSteps").innerHTML = LADDER.map((l,i)=>`<div class="step" data-l="${i}"><b>${l.t}</b><small>${l.s}</small></div>`).join("");
+$("#ladderRow").innerHTML = STAGES.slice(1).map((st,k)=>nodeHTML(st,k+1)).join(`<span class="arrow">→</span>`);
+$("#ladderCtx").innerHTML = nodeHTML(STAGES[0],0);
+function renderLadder(){
+  const L=LADDER[lad];
+  $$(".step").forEach(s=>s.classList.toggle("on",+s.dataset.l===lad));
+  $$("#ladder .node").forEach(n=>{const i=+n.dataset.i;n.classList.toggle("human",L.human.includes(i));n.classList.toggle("auto",L.auto.includes(i));n.style.cursor="default";});
+  $("#ladderText").innerHTML=`<h3>${L.t}</h3><p style="margin:0">${L.d}</p>`;
+}
+$$(".step").forEach(s=>s.addEventListener("click",()=>{lad=+s.dataset.l;renderLadder();}));
+renderLadder();
+
+// CASES
+const keys=Object.keys(CASES); let ck=1;
+$("#caseTabs").innerHTML = keys.map((k,i)=>`<button data-k="${i}">${k}</button>`).join("");
+function renderCase(){
+  $$("#caseTabs button").forEach(b=>b.classList.toggle("on",+b.dataset.k===ck));
+  const c=CASES[keys[ck]];
+  $("#caseBody").innerHTML=`
+   <div class="card pmc"><span class="lbl">A · 기획 PM</span><ul>${c.pm.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+   <div class="card devc"><span class="lbl">B · 엔지니어</span><ul>${c.dev.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+}
+$$("#caseTabs button").forEach(b=>b.addEventListener("click",()=>{ck=+b.dataset.k;renderCase();}));
+renderCase();
+
+// COPY
+$$(".copy").forEach(b=>b.addEventListener("click",async()=>{
+  const el=document.getElementById(b.dataset.copy); const txt=el.innerText;
+  try{await navigator.clipboard.writeText(txt);b.textContent="복사됨 ✓";}
+  catch(e){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="선택됨 — ⌘C";}
+  setTimeout(()=>b.textContent=b.dataset.copy==="tpl"?"템플릿 복사":"복사",1800);
+}));
+
+// NAV highlight
+const secs=$$("section[id]"), links=$$("nav a[href^='#']");
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id));}})},{rootMargin:"-40% 0px -55% 0px"});
+secs.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
