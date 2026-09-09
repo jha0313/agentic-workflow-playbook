@@ -10,12 +10,12 @@
 [![LinkedIn](<https://img.shields.io/badge/LinkedIn-jae--sang--ha-0A66C2?style=for-the-badge&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHRleHQgeD0nMS41JyB5PScxOS41JyBmb250LWZhbWlseT0nQXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWYnIGZvbnQtd2VpZ2h0PSdib2xkJyBmb250LXNpemU9JzE5JyBmaWxsPSd3aGl0ZSc+aW48L3RleHQ+PC9zdmc+>)](https://www.linkedin.com/in/jae-sang-ha/)
 [![KakaoTalk Open Chat](https://img.shields.io/badge/Open%20Chat-KakaoTalk-FEE500?style=for-the-badge&logo=kakaotalk&logoColor=000000)](https://open.kakao.com/o/g3Os2Lri)
 
-| | |
-|:--|:--|
-| ▶️ **유튜브** | [@sv.developer](https://www.youtube.com/@sv.developer) — Claude Code · Agentic Engineering |
-| 🎓 **강의** | [실리콘밸리 엔지니어의 Claude Code — 바이브 코딩 & 에이전틱 워크플로우 실전 로드맵](https://fastcampus.co.kr/data_online_svvibecoding) (무료 공개) |
-| 💼 **링크드인** | [jae-sang-ha](https://www.linkedin.com/in/jae-sang-ha/) |
-| 💬 **오픈카톡방** | [open.kakao.com/o/g3Os2Lri](https://open.kakao.com/o/g3Os2Lri) — 세미나 질문 · 해커톤 준비 도움 |
+<table>
+<tr><td align="right">▶️ <b>유튜브</b></td><td><a href="https://www.youtube.com/@sv.developer">@sv.developer</a> — Claude Code · Agentic Engineering</td></tr>
+<tr><td align="right">🎓 <b>강의</b></td><td><a href="https://fastcampus.co.kr/data_online_svvibecoding">실리콘밸리 엔지니어의 Claude Code — 바이브 코딩 &amp; 에이전틱 워크플로우 실전 로드맵</a> (무료 공개)</td></tr>
+<tr><td align="right">💼 <b>링크드인</b></td><td><a href="https://www.linkedin.com/in/jae-sang-ha/">jae-sang-ha</a></td></tr>
+<tr><td align="right">💬 <b>오픈카톡방</b></td><td><a href="https://open.kakao.com/o/g3Os2Lri">open.kakao.com/o/g3Os2Lri</a> — 세미나 질문 · 해커톤 준비 도움</td></tr>
+</table>
 
 </div>
 
