@@ -1,6 +1,23 @@
 # 워크플로우와 검증 — 에이전틱 워크플로우 플레이북
 
-**Jae Ha** · 유튜브 [@sv.developer](https://www.youtube.com/@sv.developer) · 강의 [실리콘밸리 엔지니어의 Claude Code — 바이브 코딩 & 에이전틱 워크플로우](https://fastcampus.co.kr/data_online_svvibecoding) · 링크드인 [jae-sang-ha](https://www.linkedin.com/in/jae-sang-ha/) · 오픈카톡방 [open.kakao.com/o/g3Os2Lri](https://open.kakao.com/o/g3Os2Lri)
+<div align="center">
+
+**Jae Ha** — Meta 시니어 엔지니어 · 9년 차 · Dev Productivity champion  
+<sub>메타에서 실제로 해보고 배운 것을 계속 공유합니다</sub>
+
+[![YouTube @sv.developer](https://img.shields.io/badge/YouTube-%40sv.developer-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@sv.developer)
+[![Course](https://img.shields.io/badge/Course-Claude%20Code%20%26%20Agentic%20Workflow-1F6FEB?style=for-the-badge&logo=bookstack&logoColor=white)](https://fastcampus.co.kr/data_online_svvibecoding)
+[![LinkedIn](<https://img.shields.io/badge/LinkedIn-jae--sang--ha-0A66C2?style=for-the-badge&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHRleHQgeD0nMS41JyB5PScxOS41JyBmb250LWZhbWlseT0nQXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWYnIGZvbnQtd2VpZ2h0PSdib2xkJyBmb250LXNpemU9JzE5JyBmaWxsPSd3aGl0ZSc+aW48L3RleHQ+PC9zdmc+>)](https://www.linkedin.com/in/jae-sang-ha/)
+[![KakaoTalk Open Chat](https://img.shields.io/badge/Open%20Chat-KakaoTalk-FEE500?style=for-the-badge&logo=kakaotalk&logoColor=000000)](https://open.kakao.com/o/g3Os2Lri)
+
+| | |
+|:--|:--|
+| ▶️ **유튜브** | [@sv.developer](https://www.youtube.com/@sv.developer) — Claude Code · Agentic Engineering |
+| 🎓 **강의** | [실리콘밸리 엔지니어의 Claude Code — 바이브 코딩 & 에이전틱 워크플로우 실전 로드맵](https://fastcampus.co.kr/data_online_svvibecoding) (무료 공개) |
+| 💼 **링크드인** | [jae-sang-ha](https://www.linkedin.com/in/jae-sang-ha/) |
+| 💬 **오픈카톡방** | [open.kakao.com/o/g3Os2Lri](https://open.kakao.com/o/g3Os2Lri) — 세미나 질문 · 해커톤 준비 도움 |
+
+</div>
 
 삼성전자 DX 세미나 2차(2026년 9월) 자료. AI에게 칸 하나가 아니라 **절차 전체**를 넘기는 6단계 루프(`0 맥락 → 1 의도 → 2 스펙 → 3 분해 → 4 구현 → 5 검증 → 6 개선`)와, 그 결과를 믿게 만드는 검증 구조(5-a 게이트 / 5-b 외부검증)를 다룬다.
 
