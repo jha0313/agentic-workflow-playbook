@@ -1,6 +1,6 @@
 # 워크플로우와 검증 — 에이전틱 워크플로우 플레이북
 
-**Jae Ha** · 유튜브 [@sv.developer](https://www.youtube.com/@sv.developer) · 강의 [실리콘밸리 엔지니어의 Claude Code — 바이브 코딩 & 에이전틱 워크플로우](https://fastcampus.co.kr/data_online_svvibecoding) · 링크드인 [jae-sang-ha](https://www.linkedin.com/in/jae-sang-ha/)
+**Jae Ha** · 유튜브 [@sv.developer](https://www.youtube.com/@sv.developer) · 강의 [실리콘밸리 엔지니어의 Claude Code — 바이브 코딩 & 에이전틱 워크플로우](https://fastcampus.co.kr/data_online_svvibecoding) · 링크드인 [jae-sang-ha](https://www.linkedin.com/in/jae-sang-ha/) · 오픈카톡방 [open.kakao.com/o/g3Os2Lri](https://open.kakao.com/o/g3Os2Lri)
 
 삼성전자 DX 세미나 2차(2026년 9월) 자료. AI에게 칸 하나가 아니라 **절차 전체**를 넘기는 6단계 루프(`0 맥락 → 1 의도 → 2 스펙 → 3 분해 → 4 구현 → 5 검증 → 6 개선`)와, 그 결과를 믿게 만드는 검증 구조(5-a 게이트 / 5-b 외부검증)를 다룬다.
 
